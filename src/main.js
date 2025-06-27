@@ -13,33 +13,18 @@ export default class FeatureService {
     this._featureIndices = new Map()
     this._featureCollections = new Map()
 
-    this._esriServiceOptions = Object.assign({
-      useStaticZoomLevel: false,
-      minZoom: arcgisOptions.useStaticZoomLevel ? 7 : 2,
-      simplifyFactor: 0.3,
-      precision: 8,
-      where: '1=1',
-      to: null,
-      from: null,
-      outFields: '*',
-      setAttributionFromService: true,
-      f: 'pbf',
-      useSeviceBounds: true,
-      projectionEndpoint: `${arcgisOptions.url.split('rest/services')[0]}rest/services/Geometry/GeometryServer/project`,
-      token: null,
-      fetchOptions: null
-    }, arcgisOptions)
+    this._esriServiceOptions = this._initEsriServiceOptions(arcgisOptions)
 
     this._fallbackProjectionEndpoint = 'https://tasks.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer/project'
     this.serviceMetadata = null
     this._maxExtent = [-Infinity, Infinity, -Infinity, Infinity]
 
     const gjOptions = !geojsonSourceOptions ? {} : geojsonSourceOptions
-    this._map.addSource(sourceId, Object.assign(gjOptions, {
-      type: 'geojson',
-      data: this._getBlankFc()
-    }))
+    this._initSource(gjOptions)
+  }
 
+  _initSource(sourceId, gjOptions) {
+    this.addSource(sourceId, gjOptions)
     this._getServiceMetadata()
       .then(() => {
         if (!this.supportsPbf) {
@@ -67,6 +52,32 @@ export default class FeatureService {
         this.enableRequests()
         this._clearAndRefreshTiles()
       })
+  }
+
+  addSource(sourceId, gjOptions) {
+    this._map.addSource(sourceId, Object.assign(gjOptions, {
+      type: 'geojson',
+      data: this._getBlankFc()
+    }))
+  }
+
+  _initEsriServiceOptions(arcgisOptions) {
+    return Object.assign({
+      useStaticZoomLevel: false,
+      minZoom: arcgisOptions.useStaticZoomLevel ? 7 : 2,
+      simplifyFactor: 0.3,
+      precision: 8,
+      where: '1=1',
+      to: null,
+      from: null,
+      outFields: '*',
+      setAttributionFromService: true,
+      f: 'pbf',
+      useSeviceBounds: true,
+      projectionEndpoint: `${arcgisOptions.url.split('rest/services')[0]}rest/services/Geometry/GeometryServer/project`,
+      token: null,
+      fetchOptions: null
+    }, arcgisOptions)
   }
 
   destroySource() {
