@@ -20,7 +20,7 @@ export default class FeatureService {
     this._maxExtent = [-Infinity, Infinity, -Infinity, Infinity]
 
     const gjOptions = !geojsonSourceOptions ? {} : geojsonSourceOptions
-    this._initSource(gjOptions)
+    this._initSource(sourceId, gjOptions)
   }
 
   _initSource(sourceId, gjOptions) {
